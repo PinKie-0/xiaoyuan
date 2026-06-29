@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}登录 - 校园二手交易{% endblock %}
+{% block content %}
+<style>
+    .auth-input-wrap .form-control {
+        border: 1px solid rgba(88, 86, 214, 0.35) !important;
+        box-shadow: none !important;
+    }
+    .auth-input-wrap .form-control:focus {
+        border-color: rgba(88, 86, 214, 0.6) !important;
+        box-shadow: 0 0 0 0.2rem rgba(88, 86, 214, 0.15) !important;
+    }
+</style>
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-panel auth-panel-brand">
+            <span class="auth-badge">校园闲置更高效</span>
+            <div class="auth-brand-mark">
+                <span class="auth-brand-icon">♻</span>
+                <div>
+                    <p class="auth-brand-name mb-1">校园二手交易</p>
+                    <p class="auth-brand-subtitle mb-0">让闲置流转更快，让交易更安心。</p>
+                </div>
+            </div>
+            <div class="auth-copy">
+                <h2>欢迎回来</h2>
+                <p>登录后即可查看收藏、管理商品、跟进订单和消息通知，继续你的校园闲置交易。</p>
+            </div>
+            <div class="auth-benefit-list">
+                <div class="auth-benefit-item">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <div>
+                        <strong>快速发布</strong>
+                        <span>几步即可上传商品信息和图片。</span>
+                    </div>
+                </div>
+                <div class="auth-benefit-item">
+                    <i class="bi bi-shield-check"></i>
+                    <div>
+                        <strong>交易更安心</strong>
+                        <span>支持订单流程、消息沟通和评价反馈。</span>
+                    </div>
+                </div>
+                <div class="auth-benefit-item">
+                    <i class="bi bi-chat-dots-fill"></i>
+                    <div>
+                        <strong>消息不漏看</strong>
+                        <span>收藏、订单和站内通知都能集中查看。</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-panel auth-form-panel">
+            <div class="auth-form-header">
+                <span class="auth-eyebrow">账号登录</span>
+                <h3>登录你的校园账号</h3>
+                <p>输入用户名、手机号或邮箱及密码，继续浏览、沟通和交易。</p>
+            </div>
+
+            <form method="post" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label">账号</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-person"></i>
+                        {{ form.username(class="form-control form-control-lg", placeholder="请输入用户名、手机号或邮箱") }}
+                    </div>
+                    {% for err in form.username.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-2">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <label class="form-label mb-0">密码</label>
+                        <a href="{{ url_for('auth.forgot_password') }}" class="auth-inline-link">忘记密码？</a>
+                    </div>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-lock"></i>
+                        {{ form.password(class="form-control form-control-lg", placeholder="请输入密码") }}
+                    </div>
+                    {% for err in form.password.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="auth-meta">
+                    <span><i class="bi bi-shield-lock"></i> 连续输错 5 次将临时锁定账号</span>
+                </div>
+                <div class="auth-meta">
+                    <span><i class="bi bi-clock-history"></i> 登录后 30 分钟无操作将自动失效</span>
+                </div>
+
+                <div class="d-grid mt-4">
+                    {{ form.submit(class="btn btn-primary btn-lg auth-submit") }}
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+</section>
+{% endblock %}

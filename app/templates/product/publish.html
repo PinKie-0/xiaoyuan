@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+{% block title %}发布商品{% endblock %}
+{% block content %}
+{% if publish_success %}
+<div id="publish-success-flag" style="display: none;"></div>
+{% endif %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm publish-form-shell">
+            <div class="card-header">
+                <h5 class="mb-1">发布二手商品</h5>
+                <p class="text-muted small mb-0">补充清晰的信息和图片，可以提升商品曝光和成交效率。</p>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    {{ form.submission_token() }}
+                    <div class="mb-3">
+                        {{ form.product_name.label(class="form-label") }}
+                        {{ form.product_name(class="form-control", placeholder="请输入商品名称") }}
+                        {% for err in form.product_name.errors %}<small class="text-danger">{{ err }}</small>{% endfor %}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.category_id.label(class="form-label") }}
+                            {{ form.category_id(class="form-select") }}
+                            {% for err in form.category_id.errors %}<small class="text-danger">{{ err }}</small>{% endfor %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.price.label(class="form-label") }}
+                            <div class="input-group">
+                                <span class="input-group-text">¥</span>
+                                {{ form.price(class="form-control", placeholder="0.01~99999.99", step="0.01") }}
+                            </div>
+                            {% for err in form.price.errors %}<small class="text-danger">{{ err }}</small>{% endfor %}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        {{ form.condition_level.label(class="form-label") }}
+                        {{ form.condition_level(class="form-select") }}
+                        {% for err in form.condition_level.errors %}<small class="text-danger">{{ err }}</small>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.trade_location.label(class="form-label") }}
+                        {{ form.trade_location(class="form-control", placeholder="如：XX宿舍楼、XX食堂门口") }}
+                        {% for err in form.trade_location.errors %}<small class="text-danger">{{ err }}</small>{% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows="4", placeholder="请详细描述商品状况（10~1000字）", maxlength=1000) }}
+                        {% for err in form.description.errors %}<small class="text-danger">{{ err }}</small>{% endfor %}
+                        <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap mt-2">
+                            <small class="text-muted">建议说明购买时间、使用频率、瑕疵情况和交易方式</small>
+                            <small class="text-muted">已输入 <span id="descCount">0</span>/1000 字符</small>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">商品图片 (1~6张, JPG/PNG/WebP, 每张<5MB)</label>
+                        <input type="file" id="productImages" name="images" class="form-control" multiple accept="image/jpeg,image/png,image/webp">
+                        <small class="text-muted">提交审核时至少需要1张图片。如验证失败，图片需要重新选择。</small>
+                        <div id="imagePreview" class="d-flex flex-wrap gap-2 mt-3"></div>
+                    </div>
+                    <div class="d-flex gap-2 publish-action-row">
+                        {{ form.submit_publish(class="btn btn-primary") }}
+                        {{ form.submit_draft(class="btn btn-outline-secondary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+const descInput = document.getElementById('description');
+const descCount = document.getElementById('descCount');
+const imageInput = document.getElementById('productImages');
+const imagePreview = document.getElementById('imagePreview');
+const STORAGE_KEY = 'publish_form_data';
+
+// 保存表单数据到 localStorage
+function saveFormData() {
+    const formData = {
+        product_name: document.getElementById('product_name').value,
+        category_id: document.getElementById('category_id').value,
+        price: document.getElementById('price').value,
+        condition_level: document.getElementById('condition_level').value,
+        trade_location: document.getElementById('trade_location').value,
+        description: document.getElementById('description').value
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+}
+
+// 从 localStorage 恢复表单数据
+function restoreFormData() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        try {
+            const formData = JSON.parse(saved);
+            if (formData.product_name) document.getElementById('product_name').value = formData.product_name;
+            if (formData.category_id) document.getElementById('category_id').value = formData.category_id;
+            if (formData.price) document.getElementById('price').value = formData.price;
+            if (formData.condition_level) document.getElementById('condition_level').value = formData.condition_level;
+            if (formData.trade_location) document.getElementById('trade_location').value = formData.trade_location;
+            if (formData.description) document.getElementById('description').value = formData.description;
+            descCount.textContent = (formData.description || '').length;
+        } catch (e) {
+            console.error('恢复表单数据失败', e);
+        }
+    }
+}
+
+// 清除 localStorage 中的表单数据
+function clearFormData() {
+    localStorage.removeItem(STORAGE_KEY);
+}
+
+// 重置表单到初始状态
+function resetForm() {
+    document.getElementById('product_name').value = '';
+    document.getElementById('category_id').selectedIndex = 0;
+    document.getElementById('price').value = '';
+    document.getElementById('condition_level').selectedIndex = 0;
+    document.getElementById('trade_location').value = '';
+    document.getElementById('description').value = '';
+    descCount.textContent = '0';
+    imagePreview.innerHTML = '';
+    imageInput.value = '';
+    clearFormData();
+}
+
+function renderPreview(files) {
+    imagePreview.innerHTML = '';
+    Array.from(files).slice(0, 6).forEach((file, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'text-center';
+        wrapper.innerHTML = `
+            <img alt="preview" class="rounded border mb-1" style="width:88px;height:88px;object-fit:cover;">
+            <div class="small text-muted">${index === 0 ? '封面' : '图片' + (index + 1)}</div>
+        `;
+        const img = wrapper.querySelector('img');
+        img.src = URL.createObjectURL(file);
+        imagePreview.appendChild(wrapper);
+    });
+}
+
+// 监听所有输入框变化时保存数据
+document.getElementById('product_name').addEventListener('input', saveFormData);
+document.getElementById('category_id').addEventListener('change', saveFormData);
+document.getElementById('price').addEventListener('input', saveFormData);
+document.getElementById('condition_level').addEventListener('change', saveFormData);
+document.getElementById('trade_location').addEventListener('input', saveFormData);
+descInput.addEventListener('input', function () {
+    descCount.textContent = this.value.length;
+    saveFormData();
+});
+
+imageInput.addEventListener('change', function () {
+    renderPreview(this.files);
+});
+
+// 页面加载时恢复数据
+document.addEventListener('DOMContentLoaded', function() {
+    // 检查隐藏的标记元素
+    const hasPublishSuccess = document.getElementById('publish-success-flag') !== null;
+    
+    // 检查 URL 参数中是否有成功标记
+    const urlParams = new URLSearchParams(window.location.search);
+    const publishSuccess = urlParams.get('publish_success');
+    
+    // 检查 sessionStorage 标记
+    const justPublished = sessionStorage.getItem('just_published');
+    
+    // 如果有任何成功标记，完全重置表单
+    if (hasPublishSuccess || publishSuccess === '1' || justPublished) {
+        resetForm();
+        sessionStorage.removeItem('just_published');
+    } else {
+        // 否则正常恢复数据
+        restoreFormData();
+    }
+});
+
+// 表单提交时立即清除缓存
+const form = document.querySelector('form');
+form.addEventListener('submit', function(e) {
+    // 立即清除所有缓存
+    clearFormData();
+    // 设置标记表示已经提交过
+    sessionStorage.setItem('just_published', 'true');
+});
+</script>
+{% endblock %}

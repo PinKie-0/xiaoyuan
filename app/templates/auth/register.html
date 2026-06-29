@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+{% block title %}注册 - 校园二手交易{% endblock %}
+{% block content %}
+{% if register_success %}
+<div id="register-success-flag" style="display: none;"></div>
+{% endif %}
+<style>
+    .auth-input-wrap .form-control,
+    .auth-input-wrap .form-select {
+        border: 1px solid rgba(88, 86, 214, 0.35) !important;
+        box-shadow: none !important;
+    }
+    .auth-input-wrap .form-control:focus,
+    .auth-input-wrap .form-select:focus {
+        border-color: rgba(88, 86, 214, 0.6) !important;
+        box-shadow: 0 0 0 0.2rem rgba(88, 86, 214, 0.15) !important;
+    }
+    #flash-messages {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        max-width: 400px;
+    }
+</style>
+<section class="auth-shell">
+    <div class="auth-card">
+        <div class="auth-panel auth-panel-brand auth-panel-brand-alt">
+            <span class="auth-badge">3 分钟完成注册</span>
+            <div class="auth-brand-mark">
+                <span class="auth-brand-icon">♻</span>
+                <div>
+                    <p class="auth-brand-name mb-1">加入校园二手</p>
+                    <p class="auth-brand-subtitle mb-0">发布闲置、联系买家、管理订单都在一个账号里完成。</p>
+                </div>
+            </div>
+            <div class="auth-copy">
+                <h2>创建你的专属账号</h2>
+                <p>注册后即可上架商品、收藏心仪好物，并通过站内消息快速达成交易。</p>
+            </div>
+            <div class="auth-help-list">
+                <div class="auth-help-card">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>用户名限 4~20 位字母、数字、下划线</span>
+                </div>
+                <div class="auth-help-card">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>密码需为 8~20 位且同时包含字母和数字</span>
+                </div>
+                <div class="auth-help-card">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>手机号或邮箱至少填写一项，并完成验证码校验</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-panel auth-form-panel">
+            <div class="auth-form-header">
+                <span class="auth-eyebrow">快速注册</span>
+                <h3>创建新账号</h3>
+                <p>完善基础信息后即可开始使用校园二手平台。</p>
+            </div>
+
+            <form method="post" novalidate id="register-form">
+                {{ form.hidden_tag() }}
+
+                <div class="mb-3">
+                    <label class="form-label">用户名</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-person"></i>
+                        {{ form.username(class="form-control form-control-lg", placeholder="请输入 4~20 位用户名") }}
+                    </div>
+                    {% for err in form.username.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">密码</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-lock"></i>
+                        {{ form.password(class="form-control form-control-lg", placeholder="请输入 8~20 位且包含字母和数字的密码") }}
+                    </div>
+                    <div class="form-text">密码必须同时包含字母和数字。</div>
+                    {% for err in form.password.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">确认密码</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-shield-lock"></i>
+                        {{ form.confirm_password(class="form-control form-control-lg", placeholder="请再次输入密码") }}
+                    </div>
+                    {% for err in form.confirm_password.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">手机号 <span class="text-muted small">（与邮箱至少填写一项）</span></label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-telephone"></i>
+                        {{ form.phone(class="form-control form-control-lg", placeholder="请输入 11 位手机号") }}
+                    </div>
+                    {% for err in form.phone.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">邮箱 <span class="text-muted small">（与手机号至少填写一项）</span></label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-envelope"></i>
+                        {{ form.email(class="form-control form-control-lg", placeholder="请输入常用邮箱") }}
+                    </div>
+                    {% for err in form.email.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">昵称 <span class="text-muted small">（选填）</span></label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-person-badge"></i>
+                        {{ form.nickname(class="form-control form-control-lg", placeholder="请输入昵称，留空则后续再设置") }}
+                    </div>
+                    {% for err in form.nickname.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">账号类型</label>
+                    <div class="auth-input-wrap">
+                        <i class="bi bi-person-gear"></i>
+                        {{ form.role(class="form-select form-select-lg", id="role-select") }}
+                    </div>
+                    <div class="form-text">管理员拥有后台管理权限，普通用户可正常买卖闲置物品。</div>
+                    {% for err in form.role.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">验证码</label>
+                    <div class="row g-2 align-items-start">
+                        <div class="col-sm-7">
+                            <div class="auth-input-wrap">
+                                <i class="bi bi-shield-check"></i>
+                                {{ form.otp(class="form-control form-control-lg", placeholder="请输入 6 位验证码", maxlength=6) }}
+                            </div>
+                        </div>
+                        <div class="col-sm-5 d-grid">
+                            <button type="button" onclick="sendOtp()" class="btn btn-outline-primary btn-lg" id="send-otp-btn">
+                                获取验证码
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-text">演示模式下，系统会直接提示验证码；正式接入时可替换为短信或邮箱发送。</div>
+                    {% for err in form.otp.errors %}
+                    <div class="auth-field-error">{{ err }}</div>
+                    {% endfor %}
+                </div>
+
+                <div class="auth-meta">
+                    <span><i class="bi bi-info-circle"></i> 注册成功后将跳转登录页，请使用新账号登录。</span>
+                </div>
+
+                <div class="d-grid mt-4">
+                    <button type="submit" name="action" value="register" class="btn btn-primary btn-lg auth-submit">
+                        {{ form.submit.label.text }}
+                    </button>
+                </div>
+            </form>
+
+
+        </div>
+    </div>
+</section>
+
+<script>
+let countdownTimer = null;
+let countdownSeconds = 60;
+
+// 页面加载时检查是否需要清除密码
+window.addEventListener('DOMContentLoaded', function() {
+    // 检查隐藏的标记元素
+    const hasRegisterSuccess = document.getElementById('register-success-flag') !== null;
+    
+    // 检查 sessionStorage 标记
+    const registerSuccess = sessionStorage.getItem('register_success');
+    
+    if (hasRegisterSuccess || registerSuccess) {
+        // 注册成功回来的，清除所有密码数据
+        clearRegisterPasswords();
+        sessionStorage.removeItem('register_success');
+    } else {
+        // 正常情况，恢复密码（验证码失败时使用）
+        restoreRegisterPasswords();
+    }
+});
+
+// 清除注册表单的密码
+function clearRegisterPasswords() {
+    sessionStorage.removeItem('register_password');
+    sessionStorage.removeItem('register_confirm_password');
+    
+    const passwordInput = document.querySelector('input[name="password"]');
+    const confirmPasswordInput = document.querySelector('input[name="confirm_password"]');
+    if (passwordInput) passwordInput.value = '';
+    if (confirmPasswordInput) confirmPasswordInput.value = '';
+}
+
+// 恢复注册表单的密码
+function restoreRegisterPasswords() {
+    const savedPassword = sessionStorage.getItem('register_password');
+    const savedConfirmPassword = sessionStorage.getItem('register_confirm_password');
+    
+    if (savedPassword) {
+        const passwordInput = document.querySelector('input[name="password"]');
+        if (passwordInput) passwordInput.value = savedPassword;
+    }
+    if (savedConfirmPassword) {
+        const confirmPasswordInput = document.querySelector('input[name="confirm_password"]');
+        if (confirmPasswordInput) confirmPasswordInput.value = savedConfirmPassword;
+    }
+}
+
+// 发送验证码时保存密码
+document.getElementById('send-otp-btn').addEventListener('click', function() {
+    const passwordInput = document.querySelector('input[name="password"]');
+    const confirmPasswordInput = document.querySelector('input[name="confirm_password"]');
+    
+    if (passwordInput && passwordInput.value) {
+        sessionStorage.setItem('register_password', passwordInput.value);
+    }
+    if (confirmPasswordInput && confirmPasswordInput.value) {
+        sessionStorage.setItem('register_confirm_password', confirmPasswordInput.value);
+    }
+});
+
+// 注册表单提交时设置成功标记
+document.getElementById('register-form').addEventListener('submit', function() {
+    sessionStorage.setItem('register_success', 'true');
+    clearRegisterPasswords();
+});
+
+// 显示消息的函数
+function showMessage(message, category) {
+    let flashDiv = document.getElementById('flash-messages');
+    if (!flashDiv) {
+        flashDiv = document.createElement('div');
+        flashDiv.id = 'flash-messages';
+        document.body.appendChild(flashDiv);
+    }
+    
+    let alertClass = 'alert-info';
+    if (category === 'success') alertClass = 'alert-success';
+    if (category === 'danger') alertClass = 'alert-danger';
+    if (category === 'warning') alertClass = 'alert-warning';
+    
+    let alertDiv = document.createElement('div');
+    alertDiv.className = `alert ${alertClass} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    flashDiv.appendChild(alertDiv);
+    
+    // 如果是成功消息，清除保存的密码
+    if (category === 'success') {
+        sessionStorage.removeItem('register_password');
+        sessionStorage.removeItem('register_confirm_password');
+    }
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// 发送验证码的函数
+function sendOtp() {
+    const btn = document.getElementById('send-otp-btn');
+    
+    if (countdownTimer) return;
+    
+    const formData = new FormData(document.getElementById('register-form'));
+    formData.append('action', 'send_otp');
+    
+    btn.disabled = true;
+    btn.innerHTML = '发送中...';
+    
+    fetch('', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        showMessage(data.message, data.success ? 'success' : 'danger');
+        
+        if (data.success) {
+            startCountdown();
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = '获取验证码';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('发送失败，请重试', 'danger');
+        btn.disabled = false;
+        btn.innerHTML = '获取验证码';
+    });
+}
+
+function startCountdown() {
+    const btn = document.getElementById('send-otp-btn');
+    countdownSeconds = 60;
+    
+    btn.disabled = true;
+    btn.innerHTML = `${countdownSeconds}秒后重新获取`;
+    
+    countdownTimer = setInterval(() => {
+        countdownSeconds--;
+        if (countdownSeconds > 0) {
+            btn.innerHTML = `${countdownSeconds}秒后重新获取`;
+        } else {
+            clearInterval(countdownTimer);
+            countdownTimer = null;
+            btn.disabled = false;
+            btn.innerHTML = '获取验证码';
+        }
+    }, 1000);
+}
+</script>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% macro product_card(product) %}
+{% set cover_image = product.cover_image %}
+<div class="col">
+    <a href="{{ url_for('browse.detail', id=product.product_id) }}" class="text-decoration-none">
+        <div class="product-card">
+            <div class="card-img-wrapper">
+                {% if cover_image %}
+                <img src="{{ url_for('static', filename=cover_image) }}" alt="{{ product.product_name }}" loading="lazy">
+                {% else %}
+                <div class="img-placeholder">
+                    <i class="bi bi-image" style="font-size:2.5rem"></i>
+                </div>
+                {% endif %}
+                {% if product.condition_level == '全新' %}
+                <span class="position-absolute top-0 end-0 m-2 badge condition-new">全新</span>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                <div class="card-title">{{ product.product_name }}</div>
+                <div class="price"><span class="price-symbol">¥</span>{{ '%.2f'|format(product.price) }}</div>
+                <div class="seller-info d-flex align-items-center justify-content-between">
+                    <span class="location-text">
+                        <i class="bi bi-geo-alt"></i> {{ product.trade_location[:6] }}
+                    </span>
+                    <div class="seller-profile d-flex align-items-center gap-2">
+                        {% if product.seller %}
+                            {% if product.seller.avatar %}
+                                <img src="{{ url_for('static', filename=product.seller.avatar) }}" alt="{{ product.seller.username }}" class="seller-avatar">
+                            {% else %}
+                                <span class="seller-avatar-placeholder">{{ product.seller.username[0] }}</span>
+                            {% endif %}
+                            <span class="seller-nickname">{{ product.seller.nickname or product.seller.username }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+</div>
+{% endmacro %}

@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}提交订单{% endblock %}
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ url_for('browse.home') }}">首页</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('browse.detail', id=product.product_id) }}">{{ product.product_name }}</a></li>
+        <li class="breadcrumb-item active">确认订单</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="order-detail-card">
+            <div class="card-header"><h5 class="mb-0">确认订单信息</h5></div>
+            <div class="card-body">
+                <!-- 商品信息 -->
+                <div class="order-submit-product mb-4">
+                    <div class="card-body">
+                        <div class="d-flex gap-3">
+                            {% if product.cover_image %}
+                            <img src="{{ url_for('static', filename=product.cover_image) }}" width="100" height="100" style="object-fit:cover" class="rounded">
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ product.product_name }}</h6>
+                                <p class="text-danger fw-bold fs-4 mb-1">¥{{ '%.2f'|format(product.price) }}</p>
+                                <div class="small text-muted">
+                                    <span>{{ product.condition_level }}</span>
+                                    <span class="mx-2">·</span>
+                                    <span>交易地点：{{ product.trade_location }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <form method="post">
+                    {{ form.hidden_tag() }}
+
+                    <!-- F25: 交易方式选择 -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold mb-3">
+                            <i class="bi bi-cart-check me-2"></i>选择交易方式
+                        </label>
+                        <div class="row g-3">
+                            {% for subfield in form.trade_type %}
+                  <div class="col-md-6">
+                    <label class="card h-100 border-0 rounded-4 trade-type-card cursor-pointer">
+                      <div class="card-body">
+                        <div class="form-check d-flex align-items-center">
+                          <div class="me-3">
+                            {{ subfield(class="form-check-input", id="trade_type_" ~ loop.index0) }}
+                          </div>
+                          <div class="flex-grow-1">
+                            <div class="fw-bold mb-1">
+                              {% if subfield.data == 'OFFLINE' %}
+                              <i class="bi bi-handbag me-2"></i>线下交易
+                              {% else %}
+                              <i class="bi bi-credit-card me-2"></i>线上交易
+                              {% endif %}
+                            </div>
+                            <div class="small text-muted">
+                              {% if subfield.data == 'OFFLINE' %}
+                              当面验货，确认收货后完成订单
+                              {% else %}
+                              模拟支付，安全保障
+                              {% endif %}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  </div>
+                  {% endfor %}
+                        </div>
+                        {% if form.trade_type.errors %}
+                        <div class="text-danger small mt-2">{{ form.trade_type.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- F26: 买家留言 -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">
+                            <i class="bi bi-chat-dots me-2"></i>买家留言（选填）
+                        </label>
+                        {{ form.buyer_message(class="form-control", rows="3", maxlength="200", placeholder="可以约定见面时间、议价或者补充其他信息...") }}
+                        <div class="d-flex justify-content-between mt-1">
+                            <small class="text-muted">最多200个字符</small>
+                            <small class="text-muted"><span id="msgCount">0</span>/200</small>
+                        </div>
+                        {% if form.buyer_message.errors %}
+                        <div class="text-danger small mt-2">{{ form.buyer_message.errors[0] }}</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- 提示信息 -->
+                    <div class="order-submit-alert small mb-4 p-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>温馨提示：</strong>订单创建后不可直接修改交易方式，如需修改请取消订单后重新下单。
+                    </div>
+
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-danger btn-lg", style="border-radius:14px;") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.getElementById('buyer_message').addEventListener('input', function(){
+    document.getElementById('msgCount').textContent = this.value.length;
+});
+</script>
+{% endblock %}
